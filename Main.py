@@ -53,9 +53,13 @@ def process_data(df):
 
     # Convertir columnas a tipos adecuados
     df['Fecha'] = pd.to_datetime(df['Fecha'], errors='coerce', format='%Y%m%d')
+    df['Hora'] = pd.to_datetime(df['Hora'], errors='coerce', format='%H%M%S').dt.time
+    df['Latitud'] = pd.to_numeric(df['Latitud'], errors='coerce')
+    df['Longitud'] = pd.to_numeric(df['Longitud'], errors='coerce')
+    df['Magnitud'] = pd.to_numeric(df['Magnitud'], errors='coerce')
+    df['Profundidad'] = pd.to_numeric(df['Profundidad'], errors='coerce')
 
     return df
-
 
 # Main para mostrar los datos
 if __name__ == "__main__":
