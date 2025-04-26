@@ -30,7 +30,7 @@ def home_page(df):
 
 
     st.markdown("""
-        <h1 class='main-title'>Catálogo Sísmico del Perú 1960-2021 🌍</h1>
+        <h1 class='main-title'>Catálogo Sísmico del Perú 1960-2023 🌍</h1>
         <p class='center-text' style='color:#4B5563; margin-bottom: 30px;'>
             Explora la actividad sísmica registrada por el <span class='highlight'>Instituto Geofísico del Perú (IGP)</span>
         </p>
