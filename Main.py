@@ -8,11 +8,16 @@ from urllib.request import urlopen
 from streamlit_option_menu import option_menu
 from Home import home_page
 from First import first
-from Second import second
-from Third import third
-from Fourth import fourth
 
 ssl._create_default_https_context = ssl._create_unverified_context
+
+# Configuración de Streamlit
+st.set_page_config(
+    page_title="Earthquakes Data",
+    page_icon="🌍",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
 # Cargar datos de URL y convertir a DataFrame
 @st.cache_data  # este decorador permite almacenar en caché los datos para evitar recargas innecesarias
@@ -78,14 +83,6 @@ def process_data(df):
     return df
 
 def setup(df):
-    # Configuración de Streamlit
-    st.set_page_config(
-        page_title="Earthquakes Data",
-        page_icon="🌍",
-        layout="wide",
-        initial_sidebar_state="expanded",
-    )
-
     # Sidebar date input
     with st.sidebar:
         selected = option_menu(
@@ -101,12 +98,6 @@ def setup(df):
             home_page(df)
         case "Análisis":
             first(df)
-        case "Visualización 2":
-            second(df)
-        case "Visualización 3":
-            third(df)
-        case "Visualización 4":
-            fourth(df)
 
 # Función principal
 def main():
