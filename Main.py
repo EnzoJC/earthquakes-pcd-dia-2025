@@ -90,16 +90,16 @@ def setup(df):
     with st.sidebar:
         selected = option_menu(
             menu_title="Earthquakes",
-            options=["Principal", "Visualización 1", "Visualización 2", "Visualización 3", "Visualización 4"],
-            icons=["house", "bar-chart", "bar-chart", "bar-chart", "bar-chart"],
+            options=["Principal", "Análisis"],
+            icons=["house", "bar-chart"],
             menu_icon="globe-americas",
             default_index=0,
         )
     # Mostrar la página de inicio o las visualizaciones según la selección
     match selected:
         case "Principal":
-            home_page()
-        case "Visualización 1":
+            home_page(df)
+        case "Análisis":
             first(df)
         case "Visualización 2":
             second(df)

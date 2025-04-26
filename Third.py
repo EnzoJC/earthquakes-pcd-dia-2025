@@ -1,27 +1,25 @@
 import streamlit as st
-import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 def third(df):
-    # Sidebar para los filtros del dataset
-    st.sidebar.title("Filtros")
-
-    max_fecha = df['date'].max()
-    min_fecha = max_fecha - pd.DateOffset(years=1)
-
-    fecha_range = st.sidebar.date_input("Rango de fechas", [min_fecha, max_fecha])
-
-    magnitud_range = st.sidebar.slider("Magnitud", float(df['magnitude'].min()), float(df['magnitude'].max()),
-                                       (2.5, 4.9))
-    profundidad_range = st.sidebar.slider("Profundidad (km)", float(df['depth'].min()), float(df['depth'].max()),
-                                          (0.0, 200.0))
-
-    # Aplicar filtros
-    df_filtrado = df[
-        (df['date'] >= pd.to_datetime(fecha_range[0])) &
-        (df['date'] <= pd.to_datetime(fecha_range[1])) &
-        (df['magnitude'] >= magnitud_range[0]) &
-        (df['magnitude'] <= magnitud_range[1]) &
-        (df['depth'] >= profundidad_range[0]) &
-        (df['depth'] <= profundidad_range[1])
-        ]
+    # Los sismos superficiales no solo tienen mayor magnitud promedio, sino también una mayor variabilidad
+    st.markdown("""
+        <p style='font-size: 1.1rem; color:#461220'>
+        Los sismos superficiales no solo tienen mayor magnitud promedio, sino también una mayor variabilidad.</p>""",
+                unsafe_allow_html=True)
+    custom_colors = ["#ff4b4b", "#fab1a8", "#ffe5de"]
+    fig6, ax6 = plt.subplots(figsize=(6, 4), facecolor='#F0F2F6')
+    sns.boxplot(data=df, x='depthType', y='magnitude', palette=custom_colors, ax=ax6)
+    ax = plt.gca()
+    ax.set_facecolor("#F0F2F6")
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['bottom'].set_color('#312F2F')
+    ax.spines['left'].set_color('#312F2F')
+    ax.tick_params(axis='x', colors='#312F2F')
+    ax.tick_params(axis='y', colors='#312F2F')
+    # cambiar el nombre de los ejes
+    ax.set_xlabel("Tipo de profundidad", fontsize=12, color='#312F2F')
+    ax.set_ylabel("Magnitud", fontsize=12, color='#312F2F')
+    st.pyplot(fig6)

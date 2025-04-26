@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
+
 # @author: Anlly Correa
 def second(df):
     # Sidebar para los filtros del dataset
@@ -9,7 +10,7 @@ def second(df):
 
     # Ajustando el rango inicial para mostrar los últimos 10 años (2013-2023)
     max_fecha = df['date'].max()
-    min_fecha = max_fecha - pd.DateOffset(years=10)  
+    min_fecha = max_fecha - pd.DateOffset(years=10)
 
     fecha_range = st.sidebar.date_input("Rango de fechas", [min_fecha, max_fecha])
 
@@ -18,7 +19,7 @@ def second(df):
     profundidad_range = st.sidebar.slider("Profundidad (km)", float(df['depth'].min()), float(df['depth'].max()),
                                           (0.0, 200.0))
 
-    #filtros
+    # filtros
     df_filtrado = df[
         (df['date'] >= pd.to_datetime(fecha_range[0])) &
         (df['date'] <= pd.to_datetime(fecha_range[1])) &
@@ -26,16 +27,14 @@ def second(df):
         (df['magnitude'] <= magnitud_range[1]) &
         (df['depth'] >= profundidad_range[0]) &
         (df['depth'] <= profundidad_range[1])
-    ]
+        ]
 
     with st.container():
         sismos_por_departamento(df_filtrado)
-        st.markdown("<div style='margin-top: 50px;'></div>", unsafe_allow_html=True)
-        tendencia_sismos_tiempo(df_filtrado)
+
 
 # Función para mapear coordenadas a departamentos de Perú
 def map_to_departamento(lat, lon):
-
     # Rangos aproximados de latitud y longitud para cada departamento de Perú
     departamentos = {
         "Amazonas": {"lat_range": (-7.0, -2.0), "lon_range": (-78.5, -76.0)},
@@ -70,120 +69,100 @@ def map_to_departamento(lat, lon):
         lon_min, lon_max = ranges["lon_range"]
         if lat_min <= lat <= lat_max and lon_min <= lon <= lon_max:
             return dept
-    return "Desconocido"  
+    return "Desconocido"
+
 
 # Gráfico de barras de cantidad de sismos por departamento
 def sismos_por_departamento(df_filtrado):
-    st.markdown("""
-        <h3 style='color:#8C2F39; text-align:center;'>
-        Cantidad de Sismos por Departamento</h3>""", unsafe_allow_html=True)
-    st.markdown("""
-        <p style='font-size: 1.1rem; color:#461220'>
-        Distribución de sismos según el departamento de Perú (basado en latitud y longitud)</p>""", unsafe_allow_html=True)
-    
-  
+    # st.markdown("""
+    #     <h3 style='color:#31333F; text-align:center;'>
+    #     Cantidad de Sismos por Departamento</h3>""", unsafe_allow_html=True)
+
     df_filtrado["Departamento"] = df_filtrado.apply(
         lambda row: map_to_departamento(row["latitude"], row["longitude"]), axis=1
     )
-    
 
     df_grouped = df_filtrado.groupby("Departamento").size().reset_index(name="Count")
-    
- 
+
     df_grouped = df_grouped[df_grouped["Departamento"] != "Desconocido"]
     df_grouped = df_grouped.sort_values("Count", ascending=False).head(10)  # Top 10 departamentos
 
-  
     max_dept = df_grouped.loc[df_grouped["Count"].idxmax()]
-    insight = f"El departamento de {max_dept['Departamento']} tuvo la mayor cantidad de sismos con un total de {int(max_dept['Count'])} eventos."
-
+    st.markdown(f"<p style='font-size: 1.1rem; color:#461220'>El departamento de {max_dept['Departamento']} tuvo la mayor cantidad de sismos con un total de {max_dept['Count']} eventos.</p>",
+                unsafe_allow_html=True)
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
         x=df_grouped["Departamento"],
         y=df_grouped["Count"],
-        marker_color='#c8d6e5', 
+        marker_color='#FF4B4B',
         hovertemplate=
-        '<b>Departamento</b>: %{x}<br>'+
+        '<b>Departamento</b>: %{x}<br>' +
         '<b>Cantidad de sismos</b>: %{y}<extra></extra>'
     ))
-
 
     fig.update_layout(
         xaxis_title="Departamento",
         yaxis_title="Cantidad de sismos",
         xaxis=dict(
             tickangle=45,
-            showgrid=True,
-            gridcolor='rgba(200, 200, 200, 0.2)',  
+            showgrid=False,
+            gridcolor='rgba(200, 200, 200, 0.2)',
             zeroline=False,
             title_font=dict(color='#461220', size=16),
             tickfont=dict(color='#461220', size=14)
         ),
         yaxis=dict(
-            showgrid=True,
-            gridcolor='rgba(200, 200, 200, 0.2)', 
+            gridcolor='rgba(200, 200, 200, 0.2)',
+            showgrid=False,
             zeroline=False,
             title_font=dict(color='#461220', size=16),
             tickfont=dict(color='#461220', size=14)
         ),
-        plot_bgcolor='rgba(245, 245, 245, 0.9)',  
-        paper_bgcolor='rgba(245, 245, 245, 0.9)',  
+        plot_bgcolor='#F0F2F6',
+        paper_bgcolor='#F0F2F6',
         margin=dict(l=40, r=40, t=40, b=40),
         showlegend=False,
-    
         shapes=[
+            # Borde inferior
             dict(
-                type="rect",
+                type="line",
                 xref="paper", yref="paper",
-                x0=0, y0=0, x1=1, y1=1,
-                line=dict(
-                    color="#c44569",
-                    width=1
-                )
+                x0=0, y0=0, x1=1, y1=0,
+                line=dict(color="#312F2F", width=1)
+            ),
+            # Borde izquierdo
+            dict(
+                type="line",
+                xref="paper", yref="paper",
+                x0=0, y0=0, x1=0, y1=1,
+                line=dict(color="#312F2F", width=1)
             )
-        ]
+        ],
     )
-
 
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown(
-        f"""
-        <div style="background-color:#FFFFFF; border:2px solid #d1d8e0; border-radius:10px; padding:10px; margin-top:15px; text-align:center; width:fit-content; margin-left:auto; margin-right:auto;">
-            <p style="font-size:1rem; color:#461220; font-weight:bold; margin:0;">Insight Relevante</p>
-            <p style="font-size:0.9rem; color:#461220; margin:0;">{insight}</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
 # Tendencia de sismos a lo largo del tiempo (frecuencia mensual) con interactividad
 def tendencia_sismos_tiempo(df_filtrado):
     st.markdown("""
-        <h3 style='color:#8C2F39; text-align:center;'>
-        Frecuencia de Sismos por Años</h3>""", unsafe_allow_html=True)
-    st.markdown("""
         <p style='font-size: 1.1rem; color:#461220'>
-        Evolución de la frecuencia de sismos a lo largo del tiempo (pase el cursor sobre la línea para ver el promedio de magnitud por año)</p>""", unsafe_allow_html=True)
-    
-  
+        El año 2023 tuvo la mayor frecuencia de sismos con un total de 459 eventos</p>""",
+                unsafe_allow_html=True)
+
     df_filtrado["YearMonth"] = pd.to_datetime(df_filtrado["date"]).dt.to_period('M')
     df_tendencia = df_filtrado.groupby("YearMonth").size().reset_index(name="Count")
     df_tendencia["YearMonth"] = df_tendencia["YearMonth"].dt.to_timestamp()
 
-    
     df_filtrado["Year"] = pd.to_datetime(df_filtrado["date"]).dt.year
     avg_magnitude = df_filtrado.groupby("Year")["magnitude"].mean().reset_index()
     avg_magnitude["Year"] = avg_magnitude["Year"].astype(str)
 
-  
     avg_magnitude_dict = dict(zip(avg_magnitude["Year"], avg_magnitude["magnitude"].round(2)))
 
-    
     df_tendencia["Year"] = df_tendencia["YearMonth"].dt.year.astype(str)
     df_tendencia["AvgMagnitude"] = df_tendencia["Year"].map(avg_magnitude_dict)
-
 
     df_yearly = df_filtrado.groupby("Year").size().reset_index(name="Count")
     max_year = df_yearly.loc[df_yearly["Count"].idxmax()]
@@ -195,14 +174,13 @@ def tendencia_sismos_tiempo(df_filtrado):
         x=df_tendencia["YearMonth"],
         y=df_tendencia["Count"],
         mode='lines',
-        line=dict(color='#a5b1c2', width=2),
+        line=dict(color='#FF4B4B', width=2),
         hovertemplate=
-        '<b>Fecha</b>: %{x|%Y-%m}<br>'+
-        '<b>Cantidad de sismos</b>: %{y}<br>'+
+        '<b>Fecha</b>: %{x|%Y-%m}<br>' +
+        '<b>Cantidad de sismos</b>: %{y}<br>' +
         '<b>Promedio de magnitud (año)</b>: %{customdata}<extra></extra>',
         customdata=df_tendencia["AvgMagnitude"]
     ))
-
 
     fig.update_layout(
         xaxis_title="Fecha",
@@ -210,48 +188,51 @@ def tendencia_sismos_tiempo(df_filtrado):
         xaxis=dict(
             tickformat="%Y",
             tickangle=45,
-            dtick="M12", 
-            showgrid=True,
-            gridcolor='rgba(200, 200, 200, 0.2)', 
+            dtick="M12",
+            showgrid=False,
+            gridcolor='rgba(200, 200, 200, 0.2)',
             zeroline=False,
             title_font=dict(color='#461220', size=16),
             tickfont=dict(color='#461220', size=14)
         ),
         yaxis=dict(
-            showgrid=True,
-            gridcolor='rgba(200, 200, 200, 0.2)', 
+            showgrid=False,
+            gridcolor='rgba(200, 200, 200, 0.2)',
             zeroline=False,
             title_font=dict(color='#461220', size=16),
             tickfont=dict(color='#461220', size=14)
         ),
-        plot_bgcolor='rgba(245, 245, 245, 0.9)',  
-        paper_bgcolor='rgba(245, 245, 245, 0.9)',  
+        plot_bgcolor='#F0F2F6',
+        paper_bgcolor='#F0F2F6',
         margin=dict(l=40, r=40, t=40, b=40),
         showlegend=False,
 
         shapes=[
+            # Borde inferior
             dict(
-                type="rect",
+                type="line",
                 xref="paper", yref="paper",
-                x0=0, y0=0, x1=1, y1=1,
-                line=dict(
-                    color="#c44569",
-                    width=1
-                )
+                x0=0, y0=0, x1=1, y1=0,
+                line=dict(color="#312F2F", width=1)
+            ),
+            # Borde izquierdo
+            dict(
+                type="line",
+                xref="paper", yref="paper",
+                x0=0, y0=0, x1=0, y1=1,
+                line=dict(color="#312F2F", width=1)
             )
         ]
     )
 
-
     st.plotly_chart(fig, use_container_width=True)
-
-
-    st.markdown(
-        f"""
-        <div style="background-color:#FFFFFF; border:2px solid #d1d8e0; border-radius:10px; padding:10px; margin-top:15px; text-align:center; width:fit-content; margin-left:auto; margin-right:auto;">
-            <p style="font-size:1rem; color:#461220; font-weight:bold; margin:0;">Insight Relevante</p>
-            <p style="font-size:0.9rem; color:#461220; margin:0;">{insight}</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    #
+    # st.markdown(
+    #     f"""
+    #     <div style="background-color:#FFFFFF; border:2px solid #d1d8e0; border-radius:10px; padding:10px; margin-top:15px; text-align:center; width:fit-content; margin-left:auto; margin-right:auto;">
+    #         <p style="font-size:1rem; color:#461220; font-weight:bold; margin:0;">Insight Relevante</p>
+    #         <p style="font-size:0.9rem; color:#461220; margin:0;">{insight}</p>
+    #     </div>
+    #     """,
+    #     unsafe_allow_html=True
+    # )

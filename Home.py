@@ -2,7 +2,7 @@ import streamlit as st
 
 ## Página de inicio
 # @author: Anlly Correa
-def home_page():
+def home_page(df):
 
     st.markdown("""
         <style>
@@ -71,8 +71,6 @@ def home_page():
         </div>
     """, unsafe_allow_html=True)
 
-
-    st.markdown("<div class='section-margin' style='background-color: #F3F4F6; padding: 20px; border-radius: 10px;'>", unsafe_allow_html=True)
     col3, col4 = st.columns([2, 1])
     
     with col3:
@@ -113,6 +111,7 @@ def home_page():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
+    st.dataframe(df)
 
     st.markdown("""
         <div class='section-margin center-text motivational-text'>
