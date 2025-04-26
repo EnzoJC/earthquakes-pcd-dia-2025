@@ -146,10 +146,10 @@ def sismos_por_departamento(df_filtrado):
 
 # Tendencia de sismos a lo largo del tiempo (frecuencia mensual) con interactividad
 def tendencia_sismos_tiempo(df_filtrado):
-    st.markdown("""
-        <p style='font-size: 1.1rem; color:#461220'>
-        El año 2023 tuvo la mayor frecuencia de sismos con un total de 459 eventos</p>""",
-                unsafe_allow_html=True)
+    # st.markdown("""
+    #     <p style='font-size: 1.1rem; color:#461220'>
+    #     El año 2023 tuvo la mayor frecuencia de sismos con un total de 459 eventos</p>""",
+    #             unsafe_allow_html=True)
 
     df_filtrado["YearMonth"] = pd.to_datetime(df_filtrado["date"]).dt.to_period('M')
     df_tendencia = df_filtrado.groupby("YearMonth").size().reset_index(name="Count")
@@ -165,8 +165,10 @@ def tendencia_sismos_tiempo(df_filtrado):
     df_tendencia["AvgMagnitude"] = df_tendencia["Year"].map(avg_magnitude_dict)
 
     df_yearly = df_filtrado.groupby("Year").size().reset_index(name="Count")
-    max_year = df_yearly.loc[df_yearly["Count"].idxmax()]
+
+    max_year = df_tendencia.loc[df_tendencia["Count"].idxmax()]
     insight = f"El año {int(max_year['Year'])} tuvo la mayor frecuencia de sismos con un total de {int(max_year['Count'])} eventos."
+    st.markdown(f"<p style='font-size: 1.1rem; color:#461220'>{insight}</p>", unsafe_allow_html=True)
 
     fig = go.Figure()
 
